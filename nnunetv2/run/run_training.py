@@ -34,7 +34,8 @@ def get_trainer_from_args(dataset_name_or_id: Union[int, str],
                           trainer_name: str = 'nnUNetTrainer',
                           plans_identifier: str = 'nnUNetPlans',
                           use_compressed: bool = False,
-                          device: torch.device = torch.device('cuda')):
+                          device: torch.device = torch.device('cuda'),
+                          nb_folds: int = 5):
     # load nnunet class and do sanity checks
     nnunet_trainer = recursive_find_python_class(join(nnunetv2.__path__[0], "training", "nnUNetTrainer"),
                                                 trainer_name, 'nnunetv2.training.nnUNetTrainer')
@@ -47,8 +48,9 @@ def get_trainer_from_args(dataset_name_or_id: Union[int, str],
                                                     'nnUNetTrainer'
 
     # handle dataset input. If it's an ID we need to convert to int from string
-    if dataset_name_or_id.startswith('Dataset'):
-        pass
+    if isinstance(dataset_name_or_id, str):
+        if dataset_name_or_id.startswith('Dataset'):
+            pass
     else:
         try:
             dataset_name_or_id = int(dataset_name_or_id)
@@ -63,7 +65,7 @@ def get_trainer_from_args(dataset_name_or_id: Union[int, str],
     plans = load_json(plans_file)
     dataset_json = load_json(join(preprocessed_dataset_folder_base, 'dataset.json'))
     nnunet_trainer = nnunet_trainer(plans=plans, configuration=configuration, fold=fold,
-                                    dataset_json=dataset_json, unpack_dataset=not use_compressed, device=device)
+                                    dataset_json=dataset_json, unpack_dataset=not use_compressed, device=device, nb_folds=nb_folds)
     return nnunet_trainer
 
 
@@ -107,12 +109,12 @@ def cleanup_ddp():
     dist.destroy_process_group()
 
 
-def run_ddp(rank, dataset_name_or_id, configuration, fold, tr, p, use_compressed, disable_checkpointing, c, val, pretrained_weights, npz, world_size):
+def run_ddp(rank, dataset_name_or_id, configuration, fold, tr, p, use_compressed, disable_checkpointing, c, val, pretrained_weights, npz, world_size, nb_folds):
     setup_ddp(rank, world_size)
     torch.cuda.set_device(torch.device('cuda', dist.get_rank()))
 
     nnunet_trainer = get_trainer_from_args(dataset_name_or_id, configuration, fold, tr, p,
-                                           use_compressed)
+                                           use_compressed, nb_folds)
 
     if disable_checkpointing:
         nnunet_trainer.disable_checkpointing = disable_checkpointing
@@ -143,7 +145,9 @@ def run_training(dataset_name_or_id: Union[str, int],
                  continue_training: bool = False,
                  only_run_validation: bool = False,
                  disable_checkpointing: bool = False,
-                 device: torch.device = torch.device('cuda')):
+                 device: torch.device = torch.device('cuda'),
+                 num_epochs: int=1000,
+                 nb_folds: int=5):
     if isinstance(fold, str):
         if fold != 'all':
             try:
@@ -174,12 +178,15 @@ def run_training(dataset_name_or_id: Union[str, int],
                      only_run_validation,
                      pretrained_weights,
                      export_validation_probabilities,
-                     num_gpus),
+                     num_gpus,
+                     nb_folds),
                  nprocs=num_gpus,
                  join=True)
     else:
         nnunet_trainer = get_trainer_from_args(dataset_name_or_id, configuration, fold, trainer_class_name,
-                                               plans_identifier, use_compressed_data, device=device)
+                                               plans_identifier, use_compressed_data, device=device, nb_folds=nb_folds)
+        
+        nnunet_trainer.num_epochs = num_epochs
 
         if disable_checkpointing:
             nnunet_trainer.disable_checkpointing = disable_checkpointing

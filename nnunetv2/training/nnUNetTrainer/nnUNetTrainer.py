@@ -66,7 +66,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 
 class nnUNetTrainer(object):
     def __init__(self, plans: dict, configuration: str, fold: int, dataset_json: dict, unpack_dataset: bool = True,
-                 device: torch.device = torch.device('cuda')):
+                 device: torch.device = torch.device('cuda'), nb_folds:int = 5):
         # From https://grugbrain.dev/. Worth a read ya big brains ;-)
 
         # apex predator of grug is complexity
@@ -81,6 +81,8 @@ class nnUNetTrainer(object):
         # next day impossible: complexity demon spirit has entered code and very dangerous situation!
 
         # OK OK I am guilty. But I tried. http://tiny.cc/gzgwuz
+
+        self.nb_folds = nb_folds
 
         self.is_ddp = dist.is_available() and dist.is_initialized()
         self.local_rank = 0 if not self.is_ddp else dist.get_rank()
@@ -504,6 +506,7 @@ class nnUNetTrainer(object):
         it. You can create as many splits in this file as you want. Note that if you define only 4 splits (fold 0-3)
         and then set fold=4 when training (that would be the fifth split), nnU-Net will print a warning and proceed to
         use a random 80:20 data split.
+        I changed the function to be able to do a K-folds split with K chosen.
         :return:
         """
         if self.fold == "all":
@@ -518,10 +521,13 @@ class nnUNetTrainer(object):
                                     folder_with_segs_from_previous_stage=self.folder_with_segs_from_previous_stage)
             # if the split file does not exist we need to create it
             if not isfile(splits_file):
-                self.print_to_log_file("Creating new 5-fold cross-validation split...")
+                # self.print_to_log_file("Creating new 5-fold cross-validation split...")
+                self.print_to_log_file(f"Creating new {self.nb_folds}-fold cross-validation split...")
+                
                 splits = []
                 all_keys_sorted = np.sort(list(dataset.keys()))
-                kfold = KFold(n_splits=5, shuffle=True, random_state=12345)
+                # kfold = KFold(n_splits=5, shuffle=True, random_state=12345)
+                kfold = KFold(n_splits=self.nb_folds, shuffle=True, random_state=12345)
                 for i, (train_idx, test_idx) in enumerate(kfold.split(all_keys_sorted)):
                     train_keys = np.array(all_keys_sorted)[train_idx]
                     test_keys = np.array(all_keys_sorted)[test_idx]
