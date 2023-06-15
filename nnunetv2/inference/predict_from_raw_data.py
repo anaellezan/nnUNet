@@ -232,6 +232,10 @@ class nnUNetPredictor(object):
                 f'stage ({self.configuration_manager.previous_stage_name}) as input. Please provide the folder where' \
                 f' they are located via folder_with_segs_from_prev_stage'
 
+        # if use_folds is None:
+        #     print('auto_detect_available_folds used.')
+        #     use_folds = auto_detect_available_folds(model_training_output_dir, checkpoint_name)
+
         # sort out input and output filenames
         list_of_lists_or_source_folder, output_filename_truncated, seg_from_prev_stage_files = \
             self._manage_input_and_output_lists(list_of_lists_or_source_folder,
