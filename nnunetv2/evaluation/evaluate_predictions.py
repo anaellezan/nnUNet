@@ -23,12 +23,13 @@ def label_or_region_to_key(label_or_region: Union[int, Tuple[int]]):
 
 def key_to_label_or_region(key: str):
     try:
+        print(key)
         return int(key)
     except ValueError:
         key = key.replace('(', '')
         key = key.replace(')', '')
         split = key.split(',')
-        return tuple([int(i) for i in split if len(i) > 0])
+        return tuple([int(i) for i in split]) if len(key)>2 else tuple(split[0])
 
 
 def save_summary_json(results: dict, output_file: str):

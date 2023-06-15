@@ -15,11 +15,12 @@ from nnunetv2.run.run_training import run_training
 # /!\
 DATASET_IDS = [1, 2, 3]
 CONFIGURATIONS = ['2d', '3d_fullres', '3d_lowres']
+# CONFIGURATIONS = ['3d_fullres','2d']
 
 # /!\
 FOLDS_NUMBER = 10
-DATASET_ID_TO_TRAIN = 1
-CONFIGURATION_TO_TRAIN = '3d_fullres'
+DATASET_ID_TO_TRAIN = 16
+CONFIGURATION_TO_TRAIN = ['3d_fullres']#,'2d']
 EXPORT_VALIDATION_PROBABILITY = True
 
 
@@ -27,21 +28,21 @@ EXPORT_VALIDATION_PROBABILITY = True
 def plan_and_preprocess():
     # fingerprint extraction
     print("Fingerprint extraction...")
-    extract_fingerprints(dataset_ids=[10], check_dataset_integrity=True)
+    extract_fingerprints(dataset_ids=[DATASET_ID_TO_TRAIN], check_dataset_integrity=True)
 
     # experiment planning
     print('Experiment planning...')
-    plan_experiments(dataset_ids=[10],)
+    plan_experiments(dataset_ids=[DATASET_ID_TO_TRAIN],)
     # overwrite_plans_name: Optional[str] = None)
 
     # preprocessing
     print('Preprocessing...')
     preprocess(
-        dataset_ids=[10], configurations=CONFIGURATIONS,
+        dataset_ids=[DATASET_ID_TO_TRAIN], configurations=CONFIGURATIONS,
     )
 
 
-def train(dataset_id, fold, device):
+def train(dataset_id, fold, device, conf):
 
     # # multithreading in torch doesn't help nnU-Net if run on GPU
     # torch.set_num_threads(1)
@@ -50,12 +51,13 @@ def train(dataset_id, fold, device):
 
     run_training(
         dataset_name_or_id=dataset_id,
-        configuration=CONFIGURATION_TO_TRAIN,
+        configuration=conf,
         nb_folds=FOLDS_NUMBER,
         fold=fold,
         export_validation_probabilities=EXPORT_VALIDATION_PROBABILITY,
         device=device,
-        num_epochs=200
+        num_epochs=800,
+        continue_training=True
     )
     #  pretrained_weights: Optional[str] = None,
     #  continue_training: bool = False,
@@ -73,16 +75,15 @@ def main():
     torch.set_num_interop_threads(1)
     device = torch.device('cuda')
 
-    configuration = '3d_fullres'
-    dataset_id = 10
+    # configuration = '3d_fullres'
 
-    # for configuration in CONFIGURATIONS:
-    print(f"configuration: \n{configuration}\n")
-        # for dataset_id in DATASET_IDS:
-    print(f"dataset_id: \n{dataset_id}\n")
-    for fold in range(FOLDS_NUMBER):
-        print(f"fold: \n{fold}\n")
-        train(dataset_id, fold, device)
+    for configuration in CONFIGURATION_TO_TRAIN:
+        print(f"configuration: \n{configuration}\n")
+            # for dataset_id in DATASET_IDS:
+        print(f"dataset_id: \n{DATASET_ID_TO_TRAIN}\n")
+        for fold in range(2, FOLDS_NUMBER):
+            print(f"fold: \n{fold}\n")
+            train(DATASET_ID_TO_TRAIN, fold, device, configuration)
 
 
 
