@@ -1,0 +1,2 @@
+#!/bin/bash
+nnUNetv2_predict_from_modelfolder -i /media/sharedata/atriumCT/atrium_nnunet/raw_data/Dataset002_LA_CT00/val_data/fold_0/imagesTr/ -o /media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset002_LA_CT00/TEST_3D/ -m /media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset002_LA_CT00/nnUNetTrainer__nnUNetPlans__3d_fullres/ -f 0 --save_probabilities -chk checkpoint_best.pth

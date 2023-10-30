@@ -3,10 +3,12 @@ import shutil
 import os
 
 # NB_FOLDS = 10
-NB_FOLDS = 5
+# NB_FOLDS = 5
+NB_FOLDS = 2
 
 # dataset = 'Dataset004_D8CT'
-dataset = 'Dataset017_M1_mask'
+# dataset = 'Dataset017_M1_mask'
+dataset = 'Dataset002_LA_CT00'
 
 
 # splits_path = '/beegfs/azanella/data_challenge/nnUNet/nnUNet_preprocessed/Dataset001_D8/splits_final.json'
@@ -14,11 +16,16 @@ dataset = 'Dataset017_M1_mask'
 # splits_path = '/beegfs/azanella/data_challenge/nnUNet/nnUNet_preprocessed/Dataset006_M12CT/splits_final.json'
 # splits_path = '/beegfs/azanella/data_challenge/nnUNet/nnUNet_preprocessed/Dataset014_M1/splits_final.json'
 # splits_path = '/beegfs/azanella/data_challenge/nnUNet/nnUNet_preprocessed/Dataset015_M12/splits_final.json'
-splits_path = f'/beegfs/azanella/data_challenge/nnUNet/nnUNet_preprocessed/{dataset}/splits_final.json'
+# splits_path = f'/beegfs/azanella/data_challenge/nnUNet/nnUNet_preprocessed/{dataset}/splits_final.json'
+
+splits_path = f'/media/sharedata/atriumCT/atrium_nnunet/nnUNet_preprocessed/{dataset}/splits_final.json'
 splits = load_json(splits_path)
 # raw_dataset_path = '/beegfs/azanella/data_challenge/nnUNet/nnUNet_raw/training/Dataset001_D8/'
 # raw_dataset_path = '/beegfs/azanella/data_challenge/nnUNet/nnUNet_raw/training/Dataset012_M12/'
-raw_dataset_path = f'/beegfs/azanella/data_challenge/nnUNet/nnUNet_raw/training/{dataset}/'
+# raw_dataset_path = f'/beegfs/azanella/data_challenge/nnUNet/nnUNet_raw/training/{dataset}/'
+
+raw_dataset_path = f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/'
+
 raw_imagesTr_path = raw_dataset_path + 'imagesTr/'
 raw_labelsTr_path = raw_dataset_path + 'labelsTr/'
 
@@ -46,11 +53,15 @@ for fold in range(NB_FOLDS):
     print("This split has %d training and %d validation cases."
                             % (len(tr_keys), len(val_keys)))
 
-    val_imagesTr_paths = [(raw_imagesTr_path + f + '_0000.nii.gz') for f in val_keys]
+    # val_imagesTr_paths = [(raw_imagesTr_path + f + '_0000.nii.gz') for f in val_keys]
+    val_imagesTr_paths = [(raw_imagesTr_path + f + '_0000.mha') for f in val_keys]
+    
     # val_images_0001_paths = [(raw_imagesTr_path + f + '_0001.nii.gz') for f in val_keys]
     # /beegfs/azanella/data_challenge/nnUNet/nnUNet_raw/training/Dataset011_M1/pred_test_best
 
-    val_labelsTr_paths = [(raw_labelsTr_path + f + '.nii.gz') for f in val_keys]
+    # val_labelsTr_paths = [(raw_labelsTr_path + f + '.nii.gz') for f in val_keys]
+
+    val_labelsTr_paths = [(raw_labelsTr_path + f + '.mha') for f in val_keys]
     # print(val_imagesTr_paths)
     # print(val_labelsTr_paths)
     val_imagesTr_paths_dir = [f.replace('imagesTr/', f'val_data/fold_{fold}/imagesTr/') for f in val_imagesTr_paths]
