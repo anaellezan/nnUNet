@@ -72,8 +72,8 @@ def train(dataset_id, fold, device, conf):
 
 def main():
     #plan_and_preprocess()
-    torch.set_num_threads(1)
-    torch.set_num_interop_threads(1)
+    # torch.set_num_threads(1)
+    # torch.set_num_interop_threads(1)
     device = torch.device('cuda')
 
     # configuration = '3d_fullres'
@@ -91,7 +91,8 @@ def main():
         # for dataset_id in DATASET_IDS:
     print(f"dataset_id: \n{DATASET_ID_TO_TRAIN}\n")
     #for fold in range(3, FOLDS_NUMBER):
-    fold=4
+    # fold=4
+    fold='all'
     print(f"fold: \n{fold}\n")
     train(DATASET_ID_TO_TRAIN, fold, device, configuration)
 
