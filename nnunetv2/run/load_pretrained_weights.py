@@ -63,4 +63,13 @@ def load_pretrained_weights(network, fname, verbose=False):
         print("################### Done ###################")
     mod.load_state_dict(model_dict)
 
+# # Freeze for finetuning
+#     for name, parameter in mod.named_parameters():
+#         if 'seg_layers' in name:
+#             print(f"parameter '{name}' will not be freezed")
+#             parameter.requires_grad = True
+#         else:
+#             parameter.requires_grad = False
+#             print(f"parameter '{name}' will be freezed")
+
 

@@ -45,10 +45,10 @@ from nnunetv2.training.dataloading.data_loader_3d import nnUNetDataLoader3D
 from nnunetv2.training.dataloading.nnunet_dataset import nnUNetDataset
 from nnunetv2.training.dataloading.utils import get_case_identifiers, unpack_dataset
 from nnunetv2.training.logging.nnunet_logger import nnUNetLogger
-from nnunetv2.training.loss.compound_losses import DC_and_CE_loss, DC_and_BCE_loss
+from nnunetv2.training.loss.compound_losses import DC_and_CE_loss, DC_and_BCE_loss, DC_CE_and_Boundary_loss
 from nnunetv2.training.loss.deep_supervision import DeepSupervisionWrapper
 from nnunetv2.training.loss.dice import get_tp_fp_fn_tn, MemoryEfficientSoftDiceLoss
-from nnunetv2.training.lr_scheduler.polylr import PolyLRScheduler
+from nnunetv2.training.lr_scheduler.polylr import PolyLRScheduler, LRExpDecayScheduler
 from nnunetv2.utilities.collate_outputs import collate_outputs
 from nnunetv2.utilities.default_n_proc_DA import get_allowed_n_proc_DA
 from nnunetv2.utilities.file_path_utilities import check_workers_alive_and_busy
@@ -141,7 +141,7 @@ class nnUNetTrainer(object):
                 if self.is_cascaded else None
 
         ### Some hyperparameters for you to fiddle with
-        self.initial_lr = 1e-2
+        self.initial_lr = 0.006 #1e-2 #
         self.weight_decay = 3e-5
         self.oversample_foreground_percent = 0.33
         self.num_iterations_per_epoch = 250
@@ -349,6 +349,10 @@ class nnUNetTrainer(object):
                                     'do_bg': True, 'smooth': 1e-5, 'ddp': self.is_ddp},
                                    use_ignore_label=self.label_manager.ignore_label is not None,
                                    dice_class=MemoryEfficientSoftDiceLoss)
+
+            # loss = DC_CE_and_Boundary_loss({'batch_dice': self.configuration_manager.batch_dice,
+            #                        'smooth': 1e-5, 'do_bg': False, 'ddp': self.is_ddp},{}, {}, weight_ce=1, weight_dice=1,
+            #                       ignore_label=self.label_manager.ignore_label, dice_class=MemoryEfficientSoftDiceLoss)
         else:
             loss = DC_and_CE_loss({'batch_dice': self.configuration_manager.batch_dice,
                                    'smooth': 1e-5, 'do_bg': False, 'ddp': self.is_ddp}, {}, weight_ce=1, weight_dice=1,
@@ -464,7 +468,9 @@ class nnUNetTrainer(object):
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(self.network.parameters(), self.initial_lr, weight_decay=self.weight_decay,
                                     momentum=0.99, nesterov=True)
-        lr_scheduler = PolyLRScheduler(optimizer, self.initial_lr, self.num_epochs)
+        #### /!\
+        #lr_scheduler = PolyLRScheduler(optimizer, self.initial_lr, self.num_epochs)
+        lr_scheduler = LRExpDecayScheduler(optimizer, self.initial_lr, 0.0025)
         return optimizer, lr_scheduler
 
     def plot_network_architecture(self):
@@ -1032,12 +1038,18 @@ class nnUNetTrainer(object):
         current_epoch = self.current_epoch
         if (current_epoch + 1) % self.save_every == 0 and current_epoch != (self.num_epochs - 1):
             self.save_checkpoint(join(self.output_folder, 'checkpoint_latest.pth'))
+        
+        # Added a checkpoint every 250 epochs
+        checkpoint_every = 250
+        if (current_epoch + 1) % checkpoint_every == 0 and current_epoch != (self.num_epochs - 1):
+            self.save_checkpoint(join(self.output_folder, f'checkpoint_{current_epoch + 1}.pth'))
 
         # handle 'best' checkpointing. ema_fg_dice is computed by the logger and can be accessed like this
         if self._best_ema is None or self.logger.my_fantastic_logging['ema_fg_dice'][-1] > self._best_ema:
             self._best_ema = self.logger.my_fantastic_logging['ema_fg_dice'][-1]
             self.print_to_log_file(f"Yayy! New best EMA pseudo Dice: {np.round(self._best_ema, decimals=4)}")
             self.save_checkpoint(join(self.output_folder, 'checkpoint_best.pth'))
+            self.save_checkpoint(join(self.output_folder, f'checkpoint_best_{((current_epoch + 1) // checkpoint_every + 1) * checkpoint_every}.pth'))
 
         if self.local_rank == 0:
             self.logger.plot_progress_png(self.output_folder)

@@ -15,7 +15,9 @@ path = f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/prediction_3
 files = [f for f in os.listdir( path ) if f[-4:]=='.mha']
 
 pred_files = [f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/prediction_3d_dataset002/' + f for f in files]
-ref_files = [f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/labelsTr/' + f for f in files]
+ref_files = [f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/labelsTr_old_not_resampled/' + f for f in files]
+# ref_files = [f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/labelsTr/' + f for f in files]
+
 ref_label_files = ['/media/sharedata/atriumCT/corrected_data/GTlabels/' + f[-11:-8].split('_')[-1] + '.mha' for f in files]
 
 
@@ -91,7 +93,8 @@ for i in tqdm(range(len(pred_files))):
         bbox_auricle = np.zeros(np.shape(seg_ref_auricule_arr))
         bbox_auricle[bbox_auricle_coord[0]:bbox_auricle_coord[1]+1, bbox_auricle_coord[2]:bbox_auricle_coord[3]+1, bbox_auricle_coord[4]:bbox_auricle_coord[5]+1]=1
         multiplication_bbox_auricle_seg_pred = (bbox_auricle * seg_pred_arr).astype(int)
-        new_dice_auricle = metrics.compute_dice_coefficient(multiplication_bbox_auricle_seg_pred, seg_ref_auricule_arr)
+        multiplication_bbox_auricle_seg_ref = (bbox_auricle * seg_ref_arr).astype(int)
+        new_dice_auricle = metrics.compute_dice_coefficient(multiplication_bbox_auricle_seg_pred, multiplication_bbox_auricle_seg_ref)
         print(new_dice_auricle)
         df.loc[df['ID']==origin_id,'New_dice_auricle'] = new_dice_auricle
     
@@ -120,8 +123,8 @@ for i in tqdm(range(len(pred_files))):
     df.loc[df['ID']==origin_id,'Spacing_ref_2'] = seg_ref.GetSpacing()[2]
 
 
-df.to_csv(f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/prediction_3d_dataset002/patients_history_final_metrics_new_dice.csv', index=False)
+df.to_csv(f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/prediction_3d_dataset002/patients_history_final_metrics_new_dice_corrected.csv', index=False)
 df['nnUnet_id'] = df['nnUnet_id'].astype('int')
-df.to_csv(f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/prediction_3d_dataset002/patients_history_final_metrics_new_dice.csv', index=False)
+df.to_csv(f'/media/sharedata/atriumCT/atrium_nnunet/raw_data/{dataset}/prediction_3d_dataset002/patients_history_final_metrics_new_dice_corrected.csv', index=False)
 
 print(df)

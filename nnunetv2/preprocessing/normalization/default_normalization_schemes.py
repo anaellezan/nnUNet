@@ -93,3 +93,17 @@ class RGBTo01Normalization(ImageNormalization):
         image = image / 255.
         return image
 
+
+
+class RescaleTo01FenetrageNormalization(ImageNormalization):
+    leaves_pixels_outside_mask_at_zero_if_use_mask_for_norm_is_true = False
+
+    def run(self, image: np.ndarray, seg: np.ndarray = None) -> np.ndarray:
+        assert self.intensityproperties['min_fenetrage'] is not None, "RescaleTo01FenetrageNormalization requires intensity properties min_fenetrage and max_fenetrage"
+        image = image.astype(self.target_dtype)
+        lower_bound = self.intensityproperties['min_fenetrage']
+        upper_bound = self.intensityproperties['max_fenetrage']
+        image = np.clip(image, lower_bound, upper_bound)
+        image = (image - lower_bound) / (upper_bound - lower_bound)
+
+        return image

@@ -57,7 +57,8 @@ def train(dataset_id, fold, device, conf):
         fold=fold,
         export_validation_probabilities=EXPORT_VALIDATION_PROBABILITY,
         device=device,
-        num_epochs=1000,
+        num_epochs=500,
+        # num_epochs=1000,
         continue_training=True
     )
     #  pretrained_weights: Optional[str] = None,
@@ -92,7 +93,8 @@ def main():
     print(f"dataset_id: \n{DATASET_ID_TO_TRAIN}\n")
     #for fold in range(3, FOLDS_NUMBER):
     # fold=4
-    fold='all'
+    # fold='all'
+    fold = 0
     print(f"fold: \n{fold}\n")
     train(DATASET_ID_TO_TRAIN, fold, device, configuration)
 
