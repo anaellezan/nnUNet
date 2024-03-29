@@ -1,7 +1,9 @@
 import numpy as np
 
+
 def get_intersection(mask_1, mask_2):
-    return (mask_1 & mask_2)
+    return mask_1 & mask_2
+
 
 def compute_dice_coefficient(mask_gt, mask_pred):
     """Computes soerensen-dice coefficient.
@@ -20,7 +22,7 @@ def compute_dice_coefficient(mask_gt, mask_pred):
     if volume_sum == 0:
         return np.NaN
     volume_intersect = (mask_gt & mask_pred).sum()
-    return 2*volume_intersect / volume_sum 
+    return 2 * volume_intersect / volume_sum
 
 
 def compute_IoU_coefficient(mask_gt, mask_pred):
@@ -40,7 +42,7 @@ def compute_IoU_coefficient(mask_gt, mask_pred):
     if volume_union == 0:
         return np.NaN
     volume_intersect = (mask_gt & mask_pred).sum()
-    return volume_intersect / volume_union 
+    return volume_intersect / volume_union
 
 
 def compute_contour_volume(mask_gt, mask_pred):

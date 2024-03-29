@@ -1,0 +1,4 @@
+- For LABEL evaluation, adapt save_metrics_on_patients_history_dice_validation_labelled_pred_contour_vol_auricle_LABEL.py
+
+- For MASK evaluation, adapt
+save_metrics_on_patients_history_dice_validation_MASK.py

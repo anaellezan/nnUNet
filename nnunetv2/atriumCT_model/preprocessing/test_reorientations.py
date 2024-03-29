@@ -20,7 +20,7 @@ mask = sitk.ReadImage(
 )
 
 
-# Nearest Neighbor version:
+### Nearest Neighbor version:
 
 start_time = time.time()
 
@@ -60,7 +60,7 @@ print(
 )
 
 
-# Label Gaussian version
+### Label Gaussian version
 
 # mask_resampled_labelGaussian = sitk.Resample(
 #     mask, im0, sitk.Transform(), sitk.sitkLabelGaussian, 0, mask.GetPixelID()
