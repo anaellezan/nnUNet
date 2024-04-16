@@ -93,3 +93,4 @@ skip = '.git,*.pdf,*.svg'
 
 [tool.setuptools]
 py-modules = []
+packages = ['nnunetv2']
