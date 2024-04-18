@@ -32,7 +32,8 @@ pd.options.display.max_columns = 999
 # print(len(pred_files))
 
 
-path = '/media/sharedata/atriumCT/atrium_medFormer/results/LA_CT00/fold_0_val/mha_files/'
+# path = '/media/sharedata/atriumCT/atrium_medFormer/results/LA_CT00/fold_0_val/mha_files/'
+path = '/media/sharedata/atriumCT/atrium_medFormer/results/LA_CT00/fold_0_val_finetuning/'
 
 files = [f for f in os.listdir(path) if f[-4:] == '.mha']
 
