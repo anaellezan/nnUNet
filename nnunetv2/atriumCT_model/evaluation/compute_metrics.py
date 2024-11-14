@@ -37,30 +37,35 @@ def get_IoU_list(pred_files, ref_files):
 
 
 def main():
-    path = '/media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset001_LA_CT01/nnUNetTrainer__nnUNetPlans__3d_fullres/fold_0/validation/'
+    # path = '/media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset001_LA_CT01/nnUNetTrainer__nnUNetPlans__3d_fullres/fold_0/validation/'
     # path = '/media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset002_LA_CT00/nnUNetTrainer__nnUNetPlans__3d_fullres/fold_0/validation/'
+    path = '/home/azanella/sharedata/whole_heart/nnunet_data/nnUNet_results/Dataset007_whole_heart_CT_aorta/nnUNetTrainer__nnUNetPlans__3d_fullres/fold_0/validation_best_750/'
     files = [f for f in os.listdir(path) if f[-4:] == '.mha']
 
     # pred_files = ['/media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset001_LA_CT01/nnUNetTrainer__nnUNetPlans__3d_fullres/fold_0/validation/' + f for f in files]
     pred_files_ensemble = [
-        '/media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset001_LA_CT01/TEST_ENSEMBLE/'
+        # '/media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset001_LA_CT01/TEST_ENSEMBLE/'
+        path
         + f
         for f in files
     ]
     ref_files = [
-        '/media/sharedata/atriumCT/atrium_nnunet/raw_data/Dataset001_LA_CT01/labelsTr/'
+        # '/media/sharedata/atriumCT/atrium_nnunet/raw_data/Dataset001_LA_CT01/labelsTr/'
+        '/home/azanella/sharedata/whole_heart/nnunet_data/raw_data/Dataset007_whole_heart_CT_aorta/labelsTr/'
         + f
         for f in files
     ]
     # pred_files_ensemble = ['/media/sharedata/atriumCT/atrium_nnunet/nnUNet_results/Dataset002_LA_CT00/TEST_ENSEMBLE/' + f for f in files]
     # ref_files = ['/media/sharedata/atriumCT/atrium_nnunet/raw_data/Dataset002_LA_CT00/labelsTr/' + f for f in files]
 
-    # dices_ensemble = get_dices_list(pred_files_ensemble, ref_files)
+    dices_ensemble = get_dices_list(pred_files_ensemble, ref_files)
     # print(f'All dices of ensemble predictions for CT01:\n\n{dices_ensemble}\n')
-    # print(f'Average Dice: {np.mean(dices_ensemble)}\n\n')
+    print(f'All dices of ensemble predictions for aorta:\n\n{dices_ensemble}\n')
+    print(f'Average Dice: {np.mean(dices_ensemble)}\n\n')
 
     IoUs_ensemble = get_IoU_list(pred_files_ensemble, ref_files)
-    print(f'All IoU of ensemble predictions for CT00:\n\n{IoUs_ensemble}\n')
+    print(f'All IoU of ensemble predictions for aorta:\n\n{IoUs_ensemble}\n')
+    # print(f'All IoU of ensemble predictions for CT00:\n\n{IoUs_ensemble}\n')
     print(f'Average IoU: {np.mean(IoUs_ensemble)}\n\n')
 
 
